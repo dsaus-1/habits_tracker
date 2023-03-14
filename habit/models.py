@@ -5,6 +5,7 @@ from users.models import User
 NULLABLE = {'blank': True, 'null': True}
 
 class Habit(models.Model):
+    """Модель привычек"""
 
     user = models.ForeignKey(User, verbose_name='пользователь', on_delete=models.CASCADE)
     place = models.CharField(max_length=30, verbose_name='место')
@@ -15,12 +16,15 @@ class Habit(models.Model):
     frequency = models.IntegerField(default=1, verbose_name='периодичность')
     award = models.CharField(max_length=200, verbose_name='вознаграждение', **NULLABLE)
     time_to_complete = models.TimeField(verbose_name='время на выполнение')
-    public = models. BooleanField(default=True, verbose_name='публичная')
+    public = models.BooleanField(default=True, verbose_name='публичная')
 
-    last_execution = models.DateTimeField(verbose_name='последнее выполнение', **NULLABLE)
+    last_execution = models.DateField(verbose_name='последнее выполнение', **NULLABLE)
 
     class Meta:
         verbose_name = 'привычка'
         verbose_name_plural = 'привычки'
+
+    def __str__(self):
+        return f'{self.action} {self.place}'
 
 

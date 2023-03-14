@@ -1,4 +1,6 @@
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from users.models import User
@@ -12,7 +14,7 @@ class UserModelViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         """При создании, обновлении и просмотре своего профиля доступны дополнительные поля"""
-        if self.action == ('create' and 'update'):
+        if self.action in ['create', 'update']:
             return UserSerializer
         elif self.action == 'retrieve':
             if self.request.user == self.get_object():
@@ -24,4 +26,13 @@ class UserModelViewSet(ModelViewSet):
         if self.action == 'create':
             return [AllowAny()]
         return [OwnerProfile()]
+
+
+class ChatIDUser(APIView):
+    """Получение chat_id для регистрации"""
+    permission_classes = [AllowAny]
+
+    def get(self, *args, **kwargs):
+        return Response({"url": "t.me/push_habbit_bot"})
+
 

@@ -44,6 +44,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_celery_beat',
+    'drf_yasg',
 
     'users',
     'habit'
@@ -158,3 +160,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_TEST_CHAT_ID = os.getenv('TELEGRAM_TEST_CHAT_ID')

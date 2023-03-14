@@ -6,6 +6,7 @@ from habit.models import Habit
 
 
 class AwardValidator:
+    """Валидатор для полей related_habit и award для обычной привычки"""
 
     def __init__(self, field_1, field_2):
         self.field_1 = field_1
@@ -25,6 +26,7 @@ class AwardValidator:
 
 
 class TimeToCompleteValidator:
+    """Валидатор для поля time_to_complete (не более 2-х минут)"""
 
     def __init__(self, field):
         self.field = field
@@ -36,6 +38,8 @@ class TimeToCompleteValidator:
             raise serializers.ValidationError("Время выполнения не может быть больше 2 минут")
 
 class RelatedHabitValidator:
+    """Валидатор для поля related_habit"""
+
     def __init__(self, field):
         self.field = field
 
@@ -49,6 +53,8 @@ class RelatedHabitValidator:
 
 
 class PleasantHabitValidator:
+    """Валидатор для полей related_habit и award для приятной привычки"""
+
     def __init__(self, field):
         self.field = field
 
@@ -62,6 +68,7 @@ class PleasantHabitValidator:
                 raise serializers.ValidationError("У приятной привычки не может быть вознаграждения или связанной привычки")
 
 class FrequencyValidator:
+    """Валидатор для поля frequency (не реже 1 раза в 7 дней)"""
 
     def __init__(self, field):
         self.field = field

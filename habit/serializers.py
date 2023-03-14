@@ -5,7 +5,19 @@ from habit.validators import AwardValidator, TimeToCompleteValidator, RelatedHab
     PleasantHabitValidator
 
 
+class RelatedHabitSerializer(serializers.ModelSerializer):
+    """Сериализатор для полезных привычек"""
+    class Meta:
+        model = Habit
+        fields = ("action",
+                  "time_to_complete",
+                  "place"
+                  )
+
 class HabitSerializer(serializers.ModelSerializer):
+    """Сериализатор для всех привычек"""
+    #dict_related_habit = RelatedHabitSerializer(many=False, read_only=True, source='related_habit')
+
 
     class Meta:
         model = Habit
@@ -14,6 +26,7 @@ class HabitSerializer(serializers.ModelSerializer):
                   "action",
                   "pleasant_habit",
                   "related_habit",
+                  # "dict_related_habit",
                   "frequency",
                   "award",
                   "time_to_complete",
@@ -26,4 +39,5 @@ class HabitSerializer(serializers.ModelSerializer):
             FrequencyValidator(field='frequency'),
             PleasantHabitValidator(field='pleasant_habit')
         ]
+
 

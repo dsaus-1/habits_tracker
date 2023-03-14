@@ -5,14 +5,16 @@ from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для CRUD механизма своего профиля"""
 
     class Meta:
         model = User
         fields = (
             'id',
-            'password',
             'email',
-            'phone'
+            'chat_id',
+            'phone',
+            'password'
         )
 
     def validate_password(self, value):
@@ -20,6 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AllUserSerializer(serializers.ModelSerializer):
+    """Сериализатор для просмотра чужих профилей"""
+
     class Meta:
         model = User
         fields = (
