@@ -53,7 +53,7 @@ class HabitTestCase(APITestCase):
                     "frequency": 1,
                     "award": "Выпить чай",
                     "time_to_complete": "00:02:00",
-                    "public": False
+                    "public": True
                 }
             ]
         )
@@ -83,7 +83,7 @@ class HabitTestCase(APITestCase):
                 "frequency": 1,
                 "time_to_complete": "00:02:00",
                 "award": "Выпить чай",
-                "public": False
+                "public": True
             }
         )
 
@@ -102,7 +102,7 @@ class HabitTestCase(APITestCase):
                 "frequency": 1,
                 "time_to_complete": "00:02:00",
                 "award": "Выпить чай",
-                "public": False
+                "public": True
             }
         )
 
@@ -153,7 +153,7 @@ class PublicHabitTestCase(APITestCase):
                 "frequency": 1,
                 "time_to_complete": "00:02:00",
                 "award": "Выпить чай",
-                "public": False
+                "public": True
             }
         )
 
@@ -173,7 +173,7 @@ class PublicHabitTestCase(APITestCase):
                     "frequency": 1,
                     "award": "Выпить чай",
                     "time_to_complete": "00:02:00",
-                    "public": False
+                    "public": True
                 }
             ]
         )

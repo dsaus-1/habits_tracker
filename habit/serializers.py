@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from rest_framework import serializers
 
 from habit.models import Habit
@@ -14,9 +16,30 @@ class RelatedHabitSerializer(serializers.ModelSerializer):
                   "place"
                   )
 
+
+class HabitField(serializers.PrimaryKeyRelatedField):
+
+    def to_representation(self, value):
+        id = super(HabitField, self).to_representation(value)
+        try:
+          habit = Habit.objects.get(pk=id)
+          serializer = RelatedHabitSerializer(habit)
+          return serializer.data
+        except Habit.DoesNotExist:
+            return None
+
+    def get_choices(self, cutoff=None):
+        queryset = self.get_queryset()
+        if queryset is None:
+            return {}
+
+        return OrderedDict([(item.id, self.display_value(item)) for item in queryset])
+
+
 class HabitSerializer(serializers.ModelSerializer):
     """Сериализатор для всех привычек"""
-    #dict_related_habit = RelatedHabitSerializer(many=False, read_only=True, source='related_habit')
+    public = serializers.BooleanField(allow_null=True, default=True)
+    related_habit = HabitField(queryset=Habit.objects.all())
 
 
     class Meta:
