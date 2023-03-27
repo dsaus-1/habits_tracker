@@ -22,9 +22,10 @@ class HabitField(serializers.PrimaryKeyRelatedField):
     def to_representation(self, value):
         id = super(HabitField, self).to_representation(value)
         try:
-          habit = Habit.objects.get(pk=id)
-          serializer = RelatedHabitSerializer(habit)
-          return serializer.data
+
+            habit = Habit.objects.get(pk=id)
+            serializer = RelatedHabitSerializer(habit)
+            return serializer.data
         except Habit.DoesNotExist:
             return None
 
@@ -39,7 +40,12 @@ class HabitField(serializers.PrimaryKeyRelatedField):
 class HabitSerializer(serializers.ModelSerializer):
     """Сериализатор для всех привычек"""
     public = serializers.BooleanField(allow_null=True, default=True)
-    related_habit = HabitField(queryset=Habit.objects.all())
+    #related_habit = HabitField(queryset=Habit.objects.all(), allow_null=True)
+    related_habit = serializers.SerializerMethodField('related_habit_', read_only=True)
+
+    def related_habit_(self, obj):
+        return RelatedHabitSerializer(obj.related_habit).data
+
 
 
     class Meta:
@@ -49,7 +55,6 @@ class HabitSerializer(serializers.ModelSerializer):
                   "action",
                   "pleasant_habit",
                   "related_habit",
-                  # "dict_related_habit",
                   "frequency",
                   "award",
                   "time_to_complete",
