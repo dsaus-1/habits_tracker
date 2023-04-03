@@ -1,0 +1,79 @@
+version: "3.18"
+
+services:
+  db:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+      - .:/docker-entrypoint-initdb.d
+
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - "6381:6379"
+    volumes:
+      - ./redis-data:/var/lib/redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+
+  celery-worker:
+    build:
+      context: .
+    container_name: celery-worker
+    command: celery -A config worker -l info
+    volumes:
+      - .:/code
+    links:
+      - redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    build: .
+    container_name: celery-beat
+    command: celery -A proj beat -l info
+    volumes:
+      - .:/code
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    build:
+      context: .
+    ports:
+      - "88:88"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/sites-available/habits_tracker
+      - static_volume:/app/backend/django_static
+
+  api:
+    container_name: api
+    build:
+      context: .
+    tty: false
+    volumes:
+      - .:/code
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy

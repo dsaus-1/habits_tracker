@@ -5,7 +5,7 @@ from habit.views import HabitModelViewSet, PublicHabitReadOnlyModelViewSet
 
 app_name = HabitConfig.name
 router = DefaultRouter()
-router.register(r'habit', HabitModelViewSet, basename='habit')
-router.register(r'public_habit', PublicHabitReadOnlyModelViewSet, basename='public_habit')
+router.register('habit', HabitModelViewSet, basename='habit')
+router.register('public_habit', PublicHabitReadOnlyModelViewSet, basename='public_habit')
 
 urlpatterns = router.urls
