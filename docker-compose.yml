@@ -20,9 +20,7 @@ services:
     container_name: redis
     image: redis
     ports:
-      - "6381:6379"
-    volumes:
-      - ./redis-data:/var/lib/redis
+      - "6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
 
@@ -31,6 +29,12 @@ services:
       context: .
     container_name: celery-worker
     command: celery -A config worker -l info
+#    healthcheck:
+#      test: ["CMD", "executable"]
+#      interval: 30s
+#      timeout: 30s
+#      retries: 3
+#      start_period: 5s
     volumes:
       - .:/code
     links:
@@ -44,14 +48,18 @@ services:
   celery-beat:
     build: .
     container_name: celery-beat
-    command: celery -A proj beat -l info
+    command: celery -A config beat -l info -S django
     volumes:
       - .:/code
     depends_on:
+      celery-worker:
+        #condition: service_healthy
+        condition: service_started
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+
 
   nginx:
     image: nginx
@@ -59,13 +67,16 @@ services:
     build:
       context: .
     ports:
-      - "88:88"
+      - "80:80"
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/sites-available/habits_tracker
-      - static_volume:/app/backend/django_static
+      - ./static_volume:/code/static
 
   api:
     container_name: api
+#    command: sh -c "python manage.py collectstatic --noinput &&
+#             python manage.py migrate &&
+#             python manage.py runserver 0.0.0.0:8000"
     build:
       context: .
     tty: false
