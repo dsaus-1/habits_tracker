@@ -5,7 +5,9 @@ services:
     image: postgres
     container_name: postgres
     environment:
-      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: ${USER_DB}
+      POSTGRES_PASSWORD: ${PASSWORD_DB}
+      POSTGRES_DB: ${NAME_DB}
 
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
@@ -62,6 +64,7 @@ services:
 
 
   nginx:
+    restart: always
     image: nginx
     container_name: nginx
     build:
@@ -71,12 +74,12 @@ services:
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/sites-available/habits_tracker
       - ./static_volume:/code/static
+    depends_on:
+      api:
+        condition: service_started
 
   api:
     container_name: api
-#    command: sh -c "python manage.py collectstatic --noinput &&
-#             python manage.py migrate &&
-#             python manage.py runserver 0.0.0.0:8000"
     build:
       context: .
     tty: false
