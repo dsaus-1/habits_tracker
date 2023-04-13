@@ -4,11 +4,8 @@ services:
   db:
     image: postgres
     container_name: postgres
-    environment:
-      POSTGRES_USER: ${USER_DB}
-      POSTGRES_PASSWORD: ${PASSWORD_DB}
-      POSTGRES_DB: ${NAME_DB}
-
+    env_file:
+      - .env
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -26,54 +23,23 @@ services:
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
 
-  celery-worker:
-    build:
-      context: .
-    container_name: celery-worker
-    command: celery -A config worker -l info
-      #healthcheck:
-      #test: ["CMD", "executable"]
-      #interval: 30s
-      #timeout: 30s
-    # retries: 3
-    #        start_period: 5s
-    volumes:
-      - .:/code
-    links:
-      - redis
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  celery-beat:
-    build: .
-    container_name: celery-beat
-    command: celery -A config beat -l info -S django
-    volumes:
-      - .:/code
-    depends_on:
-      celery-worker:
-        condition: service_started
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
   nginx:
-    image: nginx
     container_name: nginx
+    restart: always
+    image: nginx:1.23-alpine
     ports:
       - "80:80"
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./static:/code/static
+      - ./static_files:/code/static
     depends_on:
       api:
         condition: service_started
+    links:
+      - api
 
-  api:
+
+  api: &api
     container_name: api
     build:
       context: .
@@ -81,9 +47,29 @@ services:
     volumes:
       - .:/code
     restart: on-failure
-    ports:
-      - "8000:8000"
+    links:
+      - redis
+      - db
     depends_on:
       db:
         condition: service_healthy
     command: bash -c "python manage.py migrate --noinput & python3 manage.py collectstatic --noinput & gunicorn config.wsgi --access-logfile - --workers 3 --bind 0.0.0.0:8000"
+
+  celery-worker:
+    <<: *api
+    container_name: celery-worker
+    command: bash -c "python3 manage.py telegram_bot & python3 manage.py check_habits & celery -A config worker -l info"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    <<: *api
+    container_name: celery-beat
+    command: celery -A config beat -l info -S django
+    depends_on:
+      celery-worker:
+        condition: service_started
+
